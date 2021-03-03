@@ -1,16 +1,22 @@
-import Input.*;
-import com.sun.org.apache.xml.internal.serializer.utils.Utils;
+import Input.CursorInput;
+import Input.Input;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryUtil;
 import shaders.ShaderProgram;
 
-import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30C.glBindVertexArray;
 import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.system.MemoryUtil.memFree;
 
 public class Main implements Runnable {
     private Thread thread;
@@ -19,6 +25,12 @@ public class Main implements Runnable {
     private GLFWKeyCallback keyCallback;
     private GLFWCursorPosCallback cursorPos;
     private ShaderProgram shaderProgram;
+
+    float[] vertices = new float[]{
+            0.0f,  0.5f, 0.0f,
+            -0.5f, -0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f
+    };
 
     public static void main(String[] args) {
         Main game  = new Main();
@@ -55,8 +67,34 @@ public class Main implements Runnable {
         GL.createCapabilities();
         glClearColor(0.56f, 0.258f, 0.425f, 1.0f);
         System.out.println("OpenGL version: " + glGetString(GL_VERSION));
+
+
+        FloatBuffer verticesBuffer = MemoryUtil.memAllocFloat(vertices.length);
+        verticesBuffer.put(vertices).flip();
+
+        int vaoId = glGenVertexArrays();
+        glBindVertexArray(vaoId);
+
+        int vboId = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vboId);
+        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
+        memFree(verticesBuffer);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        // Unbind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+// Unbind the VAO
+        glBindVertexArray(0);
+
+        if (verticesBuffer != null) {
+            MemoryUtil.memFree(verticesBuffer);
+        }
+
     }
-float c = 0.01f, d;
+
+    float c = 0.01f, d;
+
     public void update() throws InterruptedException {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glfwPollEvents();
@@ -80,9 +118,12 @@ float c = 0.01f, d;
     public void render() throws Exception {
         glfwSwapBuffers(window);
         shaderProgram = new ShaderProgram();
-        shaderProgram.createVertexShader(Utils.loadResource("/vertex.vs"));
-        shaderProgram.createFragmentShader(Utils.loadResource("/fragment.fs"));
+        shaderProgram.createVertexShader(Utils.loadResource("src\\main\\java\\shaders\\vertex.vs"));
+        shaderProgram.createFragmentShader(Utils.loadResource("src\\main\\java\\shaders\\fragment.fs"));
         shaderProgram.link();
+        shaderProgram.bind();
+
+
     }
 
     @Override
@@ -92,7 +133,7 @@ float c = 0.01f, d;
             try {
                 update();
                 render();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 shaderProgram.cleanup();
