@@ -1,8 +1,10 @@
-import Input.CursorInput;
 import Input.Input;
+import graphics.Mesh;
+import graphics.Renderer;
+import graphics.Shader;
+import graphics.Vertex;
+import maths.Vector3f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 import shaders.ShaderProgram;
@@ -11,22 +13,23 @@ import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
-import static org.lwjgl.opengl.GL30C.glBindVertexArray;
-import static org.lwjgl.system.MemoryUtil.NULL;
-import static org.lwjgl.system.MemoryUtil.memFree;
 
 public class Main implements Runnable {
-    private Thread thread;
-    private boolean running = true;
-    private long window;
-    private GLFWKeyCallback keyCallback;
+    private Thread game;
+    private Window window;
+    private Renderer renderer;
     private GLFWCursorPosCallback cursorPos;
-    private ShaderProgram shaderProgram;
-
-    float[] vertices = new float[]{
+    private Shader shader;
+    private Mesh mesh = new Mesh(new Vertex[]{
+            new Vertex(new Vector3f(-0.5f,  0.5f, 0.0f)),
+            new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f)),
+            new Vertex(new Vector3f( 0.5f, -0.5f, 0.0f)),
+            new Vertex(new Vector3f( 0.5f,  0.5f, 0.0f))
+    }, new int[] {
+            0, 1, 2,
+            0, 3, 2
+    });
+    private float[] vertices = new float[]{
             0.0f,  0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f
@@ -37,110 +40,54 @@ public class Main implements Runnable {
         game.start();
     }
 
-    public void start(){
-        running = true;
-        thread = new Thread(this, "Test app");
-        thread.start();
+    private void start(){
+        game = new Thread(this, "Test app");
+        game.start();
     }
 
-    public void init(){
-        if (!glfwInit()) System.err.println("Failed");
-
-        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-
-        window = glfwCreateWindow(800, 600, "My App", NULL, NULL);
-
-        glfwSetCursorPosCallback(window, cursorPos = new CursorInput());
-
-        glfwSetKeyCallback(window, keyCallback = new Input());
-
-        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-        glfwSetWindowPos(window, 100, 100);
-
-        glfwMakeContextCurrent(window);
-
-        glfwSwapInterval(1);
-
-        glfwShowWindow(window);
-
-        GL.createCapabilities();
-        glClearColor(0.56f, 0.258f, 0.425f, 1.0f);
-        System.out.println("OpenGL version: " + glGetString(GL_VERSION));
+    private void init(){
+        window = new Window(800, 600, "test");
+        shader = new Shader("/shaders/mainVertex.glsl", "/shaders/mainFragment.glsl");
+        renderer = new Renderer();
+        window.setBackgroundColor(1.0f, 0, 0);
+        window.create();
+        mesh.create();
+        shader.create();
 
 
         FloatBuffer verticesBuffer = MemoryUtil.memAllocFloat(vertices.length);
         verticesBuffer.put(vertices).flip();
 
-        int vaoId = glGenVertexArrays();
-        glBindVertexArray(vaoId);
-
-        int vboId = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vboId);
-        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
-        memFree(verticesBuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-
-        // Unbind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-// Unbind the VAO
-        glBindVertexArray(0);
-
-        if (verticesBuffer != null) {
-            MemoryUtil.memFree(verticesBuffer);
-        }
-
+        GL.createCapabilities();
+        glClearColor(0.56f, 0.258f, 0.425f, 1.0f);
+        System.out.println("OpenGL version: " + glGetString(GL_VERSION));
     }
 
-    float c = 0.01f, d;
 
-    public void update() throws InterruptedException {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glfwPollEvents();
-        d = c;
-        if (Input.keys[GLFW_KEY_SPACE]){
-            glClearColor(c, 0.258f, d, 1.0f);
-            Thread.sleep(100);
-            System.out.println("Нажат пробел");
-            c += 0.01f;
-            d -= 0.01f;
-        }
-        if (Input.keys[GLFW_KEY_D]){
-            glClearColor(c, 0.258f, 0.125f, d);
-            Thread.sleep(100);
-            System.out.println("Нажат D");
-            c -= 0.01f;
-            d += 0.01f;
-        }
+    private void update() throws InterruptedException {
+        window.update();
     }
 
-    public void render() throws Exception {
-        glfwSwapBuffers(window);
-        shaderProgram = new ShaderProgram();
-        shaderProgram.createVertexShader(Utils.loadResource("src\\main\\java\\shaders\\vertex.vs"));
-        shaderProgram.createFragmentShader(Utils.loadResource("src\\main\\java\\shaders\\fragment.fs"));
-        shaderProgram.link();
-        shaderProgram.bind();
-
-
+    private void render() {
+        renderer.renderMesh(mesh);
+        window.swapBuffers();
     }
 
     @Override
     public void run() {
         init();
-        while (running){
+        while (!window.shouldClose() && !Input.keys[GLFW_KEY_ESCAPE]){
             try {
                 update();
                 render();
+                if (Input.keys[GLFW_KEY_F11]){
+                    window.setFullscreen(!window.isFullscreen());
+                    System.out.println("F11");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                shaderProgram.cleanup();
             }
-
-            if (glfwWindowShouldClose(window)) running = false;
         }
-        keyCallback.free();
+        window.destroy();
     }
 }
