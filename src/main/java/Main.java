@@ -1,8 +1,6 @@
 import Input.Input;
-import graphics.Mesh;
-import graphics.Renderer;
-import graphics.Shader;
-import graphics.Vertex;
+import graphics.*;
+import maths.Vector2f;
 import maths.Vector3f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.opengl.GL;
@@ -21,14 +19,14 @@ public class Main implements Runnable {
     private GLFWCursorPosCallback cursorPos;
     private Shader shader;
     private Mesh mesh = new Mesh(new Vertex[]{
-            new Vertex(new Vector3f(-0.5f,  0.5f, 0.0f)),
-            new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f)),
-            new Vertex(new Vector3f( 0.5f, -0.5f, 0.0f)),
-            new Vertex(new Vector3f( 0.5f,  0.5f, 0.0f))
+            new Vertex(new Vector3f(-0.1f,  0.0f, 0.0f), new Vector3f(1.0f, 0.45f, 0.0f), new Vector2f(0.0f, 0.0f)),
+            new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f), new Vector2f(0.0f, 0.0f)),
+            new Vertex(new Vector3f( 0.5f, -0.5f, 0.0f), new Vector3f(0.68f, 0.9f, 1.0f), new Vector2f(0.0f, 0.0f)),
+            new Vertex(new Vector3f( 0.1f,  0.0f, 0.0f), new Vector3f(1.0f, 0.4f, 0.0f), new Vector2f(0.0f, 0.0f))
     }, new int[] {
             0, 1, 2,
             0, 3, 2
-    });
+    }, new Material("resources/textures/001-allcolors.png"));
     private float[] vertices = new float[]{
             0.0f,  0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f,
@@ -73,6 +71,12 @@ public class Main implements Runnable {
         window.swapBuffers();
     }
 
+    private void close(){
+        window.destroy();
+        mesh.destroy();
+        shader.destroy();
+    }
+
     @Override
     public void run() {
         init();
@@ -88,6 +92,6 @@ public class Main implements Runnable {
                 e.printStackTrace();
             }
         }
-        window.destroy();
+        close();
     }
 }

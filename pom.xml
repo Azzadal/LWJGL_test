@@ -25,6 +25,13 @@
         <lwjgl.natives>natives-windows</lwjgl.natives>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>clojars</id>
+            <url>http://clojars.org/repo/</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -355,6 +362,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.11</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/slick-util/slick-util -->
+        <dependency>
+            <groupId>slick-util</groupId>
+            <artifactId>slick-util</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
     </dependencies>
