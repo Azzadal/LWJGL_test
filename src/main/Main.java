@@ -13,28 +13,28 @@ import engine.maths.Vector2f;
 import engine.maths.Vector3f;
 
 public class Main implements Runnable {
-	public Thread game;
-	public Window window;
-	public Renderer renderer;
-	public Shader shader;
-	public final int WIDTH = 1280, HEIGHT = 760;
-	
-	public Mesh mesh = new Mesh(new Vertex[] {
+	private Window window;
+	private Renderer renderer;
+	private Shader shader;
+
+	private Mesh mesh = new Mesh(new Vertex[] {
 			new Vertex(new Vector3f(-0.5f,  0.5f, 0.0f), new Vector3f(1.0f, 1.0f, 0.0f), new Vector2f(0.0f, 0.0f)),
-			new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector3f(0.78f, 1.0f, 0.0f), new Vector2f(0.0f, 0.7f)),
-			new Vertex(new Vector3f( 0.5f, -0.5f, 0.0f), new Vector3f(0.0f, 0.6f, 1.0f), new Vector2f(1f, 0.7f)),
-			new Vertex(new Vector3f( 0.5f,  0.5f, 0.0f), new Vector3f(1.0f, 1.0f, 0.0f), new Vector2f(1.0f, 0f))
+			new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector3f(0.78f, 1.0f, 0.0f), new Vector2f(0.0f, 1f)),
+			new Vertex(new Vector3f( 0.5f, -0.5f, 0.0f), new Vector3f(0.0f, 0.6f, 1.0f), new Vector2f(0.5f, 1.0f)),
+			new Vertex(new Vector3f( 0.5f,  0.5f, 0.0f), new Vector3f(1.0f, 1.0f, 0.0f), new Vector2f(0.5f, 0.0f))
 		}, new int[] {
 			0, 1, 2,
 			0, 2, 3
-		}, new Material("/textures/b.png"));
+		}, new Material("/textures/5.png"));
 	
-	public void start() {
-		game = new Thread(this, "game");
+	private void start() {
+		Thread game = new Thread(this, "game");
 		game.start();
 	}
 	
-	public void init() {
+	private void init() {
+		int WIDTH = 1280;
+		int HEIGHT = 760;
 		window = new Window(WIDTH, HEIGHT, "Game");
 		shader = new Shader("/shaders/mainVertex.glsl", "/shaders/mainFragment.glsl");
 		renderer = new Renderer(shader);
