@@ -7,11 +7,13 @@ layout (location = 0) out vec4 outColor;
 vec4 textureColor;
 in vec3 position;
 
-uniform sampler2D tex;
+uniform sampler2D u_TextureSampler;
+uniform vec4 u_Colour;
 
 void main() {
 //	outColor = vec4(passColor, 1.0f);
-//	outColor = texture(tex, passTextureCoord);
-	textureColor = texture(tex, passTextureCoord);
-	outColor = vec4(passColor, 1.0) * textureColor;
+	outColor = texture(u_TextureSampler, passTextureCoord);
+//	textureColor = texture(tex, passTextureCoord);
+//	outColor = vec4(passColor, 1.0) * textureColor;
+//	outColor = u_Colour;
 }

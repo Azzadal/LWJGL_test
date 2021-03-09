@@ -3,6 +3,9 @@ package engine.graphics;
 import static org.lwjgl.opengl.GL46C.*;
 
 import engine.utils.FileUtils;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class Shader {
 	private String vertexFile, fragmentFile;
@@ -58,11 +61,61 @@ public class Shader {
 		glUseProgram(programID);
 	}
 	
-	public void unbind() {
+	void unbind() {
 		glUseProgram(0);
 	}
-	
+
+	public void setUniformInt(String name, int value){
+		glUniform1i(glGetUniformLocation(programID, name), value);
+	}
+
+	public void setUniformInt2(String name, int x, int y){
+		glUniform2i(glGetUniformLocation(programID, name), x, y);
+	}
+
+	public void setUniformInt3(String name, int x, int y, int z){
+		glUniform3i(glGetUniformLocation(programID, name), x, y, z);
+	}
+
+	public void setUniformInt4(String name, int x, int y, int z, int w){
+		glUniform4i(glGetUniformLocation(programID, name), x, y, z, w);
+	}
+
+	public void setUniformFloat(String name, float value){
+		glUniform1f(glGetUniformLocation(programID, name), value);
+	}
+
+	public void setUniformFloat2(String name, float x, float y){
+		glUniform2f(glGetUniformLocation(programID, name), x, y);
+	}
+
+	public void setUniformFloat3(String name, float x, float y, float z){
+		glUniform3f(glGetUniformLocation(programID, name), x, y, z);
+	}
+
+	public void setUniformFloat4(String name, float x, float y, float z, float w){
+		glUniform4f(glGetUniformLocation(programID, name), x, y, z, w);
+	}
+
+	public void setUniformBoolean(String name, boolean value){
+		glUniform1i(glGetUniformLocation(programID, name), value ? 1 : 0);
+	}
+
+	public void setUniformVec2(String name, Vector2f value){
+		glUniform2f(glGetUniformLocation(programID, name), value.x, value.y);
+	}
+
+	public void setUniformVec3(String name, Vector3f value){
+		glUniform3f(glGetUniformLocation(programID, name), value.x, value.y, value.z);
+	}
+
+	public void setUniformVec4(String name, Vector4f value){
+		glUniform4f(glGetUniformLocation(programID, name), value.x, value.y, value.z, value.w);
+	}
+
 	public void destroy() {
+		glDetachShader(programID, vertexID);
+		glDetachShader(programID, fragmentID);
 		glDeleteProgram(programID);
 	}
 }

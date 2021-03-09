@@ -363,11 +363,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.11</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/slick-util/slick-util -->
+        <!-- https://mvnrepository.com/artifact/org.joml/joml -->
         <dependency>
-            <groupId>slick-util</groupId>
-            <artifactId>slick-util</artifactId>
-            <version>1.0.0</version>
+            <groupId>org.joml</groupId>
+            <artifactId>joml</artifactId>
+            <version>1.9.25</version>
         </dependency>
 
     </dependencies>

@@ -1,8 +1,10 @@
 package engine.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.lwjglx.BufferUtils;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 public class FileUtils {
 	public static String loadAsString(String path) {
@@ -18,5 +20,25 @@ public class FileUtils {
 		}
 		
 		return result.toString();
+	}
+
+	public static ByteBuffer resourceToByteBuffer(final String resource) throws IOException
+	{
+		File file = new File(resource);
+
+		FileInputStream fileInputStream = new FileInputStream(file);
+		FileChannel fileChannel = fileInputStream.getChannel();
+
+		ByteBuffer buffer = BufferUtils.createByteBuffer((int) fileChannel.size() + 1);
+
+		while (fileChannel.read(buffer) != -1) {
+			;
+		}
+
+		fileInputStream.close();
+		fileChannel.close();
+		buffer.flip();
+
+		return buffer;
 	}
 }

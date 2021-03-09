@@ -4,6 +4,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL46C.*;
+
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
 public class Mesh {
@@ -11,13 +14,17 @@ public class Mesh {
 	private int[] indices;
 	private Material material;
 	private int vao, pbo, ibo, cbo, tbo;
+	protected Vector3f rotation;
+	protected Vector3f scale;
 	
-	public Mesh(Vertex[] vertices, int[] indices, Material material) {
+	public Mesh(Vertex[] vertices, int[] indices, Material material, Vector3f rotation, Vector3f scale) {
 		this.vertices = vertices;
 		this.indices = indices;
 		this.material = material;
+		this.rotation = new Vector3f(rotation);
+		this.scale = new Vector3f(scale);
 	}
-	
+
 	public void create() {
 		material.create();
 		
@@ -27,9 +34,9 @@ public class Mesh {
 		FloatBuffer positionBuffer = MemoryUtil.memAllocFloat(vertices.length * 3);
 		float[] positionData = new float[vertices.length * 3];
 		for (int i = 0; i < vertices.length; i++) {
-			positionData[i * 3] = vertices[i].getPosition().getX();
-			positionData[i * 3 + 1] = vertices[i].getPosition().getY();
-			positionData[i * 3 + 2] = vertices[i].getPosition().getZ();
+			positionData[i * 3] = vertices[i].getPosition().x;
+			positionData[i * 3 + 1] = vertices[i].getPosition().y;
+			positionData[i * 3 + 2] = vertices[i].getPosition().z;
 		}
 		positionBuffer.put(positionData).flip();
 		
@@ -38,9 +45,9 @@ public class Mesh {
 		FloatBuffer colorBuffer = MemoryUtil.memAllocFloat(vertices.length * 3);
 		float[] colorData = new float[vertices.length * 3];
 		for (int i = 0; i < vertices.length; i++) {
-			colorData[i * 3] = vertices[i].getColor().getX();
-			colorData[i * 3 + 1] = vertices[i].getColor().getY();
-			colorData[i * 3 + 2] = vertices[i].getColor().getZ();
+			colorData[i * 3] = vertices[i].getColor().x;
+			colorData[i * 3 + 1] = vertices[i].getColor().y;
+			colorData[i * 3 + 2] = vertices[i].getColor().z;
 		}
 		colorBuffer.put(colorData).flip();
 		
@@ -49,8 +56,8 @@ public class Mesh {
 		FloatBuffer textureBuffer = MemoryUtil.memAllocFloat(vertices.length * 2);
 		float[] textureData = new float[vertices.length * 2];
 		for (int i = 0; i < vertices.length; i++) {
-			textureData[i * 2] = vertices[i].getTextureCoord().getX();
-			textureData[i * 2 + 1] = vertices[i].getTextureCoord().getY();
+			textureData[i * 2] = vertices[i].getTextureCoord().x;
+			textureData[i * 2 + 1] = vertices[i].getTextureCoord().y;
 		}
 		textureBuffer.put(textureData).flip();
 		
@@ -72,6 +79,10 @@ public class Mesh {
 		glVertexAttribPointer(index, size, GL_FLOAT, false, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		return bufferID;
+	}
+
+	public Matrix4f getModelMatrix(){
+		Matrix4f modelMatrix = new Matrix4f().translate(vertices[0].getPosition());
 	}
 	
 	public void destroy() {
